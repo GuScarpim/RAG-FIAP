@@ -156,7 +156,7 @@ async def health_check():
     }
 
 
-@app.post("/upload-pdf")
+@app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     """
     Endpoint para upload de PDF
@@ -203,14 +203,11 @@ async def upload_pdf(file: UploadFile = File(...)):
 
         # Retorna informações sobre o documento processado
         return {
-            "message": "PDF processado com sucesso!",
-            "document_info": {
-                "filename": file.filename,
-                "pages": num_pages,
-                "chunks": len(text_chunks),
-                "uploaded_at": datetime.now().isoformat(),
-                "size_kb": round(file_size_kb, 2),
-            },
+            "filename": file.filename,
+            "pages": num_pages,
+            "chunks": len(text_chunks),
+            "uploaded_at": datetime.now().isoformat(),
+            "size_kb": round(file_size_kb, 2),
         }
 
     except Exception as e:
