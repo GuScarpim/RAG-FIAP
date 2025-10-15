@@ -52,7 +52,7 @@ Durante a aula, você vai implementar:
 ## 📖 Estrutura
 
 ```
-front2/
+frontend-rag/
 ├── src/
 │   ├── App.jsx              ✅ HTML pronto
 │   ├── App.css              ✅ CSS completo
