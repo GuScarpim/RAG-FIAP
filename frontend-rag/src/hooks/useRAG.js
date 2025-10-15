@@ -1,10 +1,11 @@
 import { useCallback } from 'react';
-// import { useRAGContext } from '../context/RAGContext';
+import { useRAGContext } from '../context/RAGContext';
 
 const API_URL = 'http://localhost:8000';
 
 export function useRAG() {
   // TODO: Obter estados do Context
+  const rag = useRAGContext();
 
   // TODO: Implementar função de upload
   const uploadFile = useCallback(async (file) => {

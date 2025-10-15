@@ -41,4 +41,4 @@ function ChatInput() {
   );
 }
 
-export default memo(ChatInput);
+export default ChatInput;

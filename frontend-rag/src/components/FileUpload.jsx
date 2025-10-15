@@ -29,6 +29,11 @@ function FileUpload() {
       />
 
       {/* TODO: Mostrar informações do arquivo */}
+      <div className="upload-info">
+        <strong>Arquivo carregado:</strong>
+        <br />
+        <small>Páginas: | Chunks:</small>
+      </div>
     </div>
   );
 }
