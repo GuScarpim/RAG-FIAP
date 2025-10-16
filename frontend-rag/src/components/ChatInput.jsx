@@ -1,10 +1,11 @@
 import { memo, useCallback, useState } from 'react';
-// import { useRAGContext } from '../context/RAGContext';
-// import { useRAG } from '../hooks/useRAG';
+import { useRAGContext } from '../context/RAGContext';
+import { useRAG } from '../hooks/useRAG';
 
 function ChatInput() {
   // TODO: Obter estados do Context
-
+  const { isLoading, uploadedFile } = useRAGContext();
+  const { sendQuery } = useRAG();
   // TODO: Criar estado local para o input
   const [input, setInput] = useState('');
 
@@ -12,11 +13,20 @@ function ChatInput() {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
+    const trimmedInput = input.trim();
+    if (!trimmedInput || isLoading) return;
+
+    await sendQuery(trimmedInput);
+    setInput('');
     console.log('Submit:', input);
-  }, [input]);
+  }, [input, isLoading, sendQuery]);
 
   // TODO: Implementar handleKeyDown com useCallback
   const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
   }, [handleSubmit]);
 
   return (
@@ -32,10 +42,10 @@ function ChatInput() {
 
       <button
         type="submit"
-        disabled={!input.trim()}
+        disabled={isLoading || !input.trim() || !uploadedFile}
         className="chat-button"
       >
-        📤 Enviar
+        {isLoading ? 'Enviando' : '📤 Enviar'}
       </button>
     </form>
   );

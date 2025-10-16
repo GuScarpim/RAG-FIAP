@@ -3,11 +3,12 @@ import { createContext, useContext, useState } from 'react';
 // Cria o Context
 const RAGContext = createContext(null);
 
-
 // TODO: Criar o Provider
 export function RAGProvider({ children }) {
   // TODO: Adicionar estados aqui
-  const [messages, setMessages] = useState([]);
+  const me = localStorage.getItem('messages') // Persistencia de dados
+  const [messages, setMessages] = useState(JSON.parse(me) || []);
+  const [uploadedFile, setUploadedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // TODO: Criar o value com os estados
@@ -16,7 +17,10 @@ export function RAGProvider({ children }) {
     setMessages,
     isLoading,
     setIsLoading,
+    uploadedFile,
+    setUploadedFile
   };
+
   return (
     <>
       <RAGContext.Provider value={value}>

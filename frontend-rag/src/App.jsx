@@ -1,26 +1,34 @@
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef } from 'react';
 import { useRAGContext } from './context/RAGContext';
 import './App.css';
-import ChatMessage from './components/ChatMessage';
+
+
+const FileUpload = lazy(() => import('./components/FileUpload'));
+const ChatMessage = lazy(() => import('./components/ChatMessage'));
+const ChatInput = lazy(() => import('./components/ChatInput'));
+// import ChatInput from './components/ChatInput';
+// import FileUpload from './components/FileUpload';
+// import ChatMessage from './components/ChatMessage';
+import { useRAG } from './hooks/useRAG';
 
 function App() {
   // TODO: Adicionar estados aqui
-  const { messages, isLoading } = useRAGContext();
+  const { messages, uploadedFile, isLoading } = useRAGContext();
+  const { clearMessages } = useRAG();
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const stats = () => {
-    // console.log('📊 [COM useMemo] Calculando stats...');
+  const stats = useMemo(() => {
     // Este log só aparece quando 'messages' muda!
     return {
-      total: 0,
-      user: 0,
-      bot: 0
+      total: messages.length,
+      user: messages.filter(mes => mes.type === 'user').length,
+      bot: messages.filter(mes => mes.type === 'bot').length
     };
-  };
+  }, [messages]);
 
   return (
     <div className="app">
@@ -28,32 +36,29 @@ function App() {
       <header className="app-header">
         <h1>🤖 RAG Chat - FIAP</h1>
         <p className="subtitle">
-          👆 Faça upload de um PDF para começar
+          {uploadedFile ? uploadedFile.filename : '👆 Faça upload de um PDF para começar'}
         </p>
       </header>
 
       {/* Upload Section */}
-      <div className="upload-container">
-        <label htmlFor="file-upload" className="upload-label">
-          📄 Fazer upload de PDF
-        </label>
+      <Suspense fallback={<div className="loading">Carregando...</div>}>
+        <FileUpload />
+      </Suspense>
 
-        <input
-          id="file-upload"
-          type="file"
-          accept=".pdf"
-          className="upload-input"
-        />
-      </div>
-
+      {/* TODO: Renderizar lista de mensagens aqui */}
       {/* Messages Container */}
       <div className="messages-container">
-        <div className="empty-state">
-          <h2>💬 Nenhuma conversa ainda</h2>
-          <p>Faça upload de um PDF e comece a fazer perguntas!</p>
-        </div>
-
-        {/* TODO: Renderizar lista de mensagens aqui */}
+        {messages.length === 0 ? (
+          <div className="empty-state">
+            <h2>💬 Nenhuma conversa ainda</h2>
+            <p>Faça upload de um PDF e comece a fazer perguntas!</p>
+          </div>) : (
+          <Suspense fallback={<div className="loading">Carregando mensagens...</div>}>
+            {messages.map((message) => (
+              <ChatMessage message={message} />
+            ))}
+          </Suspense>
+        )}
 
         {isLoading && (
           <div className="loading-indicator">
@@ -66,27 +71,22 @@ function App() {
       </div>
 
       {/* Stats Bar */}
-      <div className="stats-bar">
-        <span>📊 Total: {stats.total}</span>
-        <span>👤 Você: {stats.user}</span>
-        <span>🤖 Bot: {stats.bot}</span>
-        <button onClick={() => {}} className="clear-button">
-          🗑️ Limpar
-        </button>
-      </div>
+      {messages.length > 0 && (
+        <div className="stats-bar">
+          <span>📊 Total: {stats.total}</span>
+          <span>👤 Você: {stats.user}</span>
+          <span>🤖 Bot: {stats.bot}</span>
+          <button onClick={clearMessages} className="clear-button">
+            🗑️ Limpar
+          </button>
+        </div>
+      )}
       {/* TODO: Mostrar stats quando houver mensagens */}
 
       {/* Chat Input */}
-      <form className="chat-input-form">
-        <input
-          type="text"
-          placeholder="Digite sua pergunta..."
-          className="chat-input"
-        />
-        <button type="submit" className="chat-button">
-          📤 Enviar
-        </button>
-      </form>
+      <Suspense fallback={<div className="loading">Carregando input...</div>}>
+        <ChatInput />
+      </Suspense>
     </div>
   );
 }

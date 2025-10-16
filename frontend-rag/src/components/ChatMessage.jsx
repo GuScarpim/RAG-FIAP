@@ -2,39 +2,50 @@ import { memo, useMemo } from 'react';
 
 function ChatMessage({ message }) {
   // TODO: Desestruturar propriedades da mensagem
-  const { type, isError } = message;
+  const { type, content, timestamp, sources, confidence, isError } = message;
 
   // TODO: Implementar formatação de tempo com useMemo
   const formattedTime = useMemo(() => {
-    return '00:00';
-  }, []);
+
+    if (!(timestamp instanceof Date)) return '';
+    return timestamp.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }, [timestamp]);
 
   return (
     <div className={`message ${type} ${isError ? 'error' : ''}`}>
       <div className="message-header">
-        <strong>👤 Você</strong>
+        <strong>{type === 'user' ? '👤 Você' : '🤖 Assistente'}</strong>
         <span className="message-time">{formattedTime}</span>
       </div>
 
       <div className="message-content">
-        {/* TODO: Mostrar conteúdo da mensagem */}
-        Exemplo de mensagem
+        {content}
       </div>
 
       {/* TODO: Mostrar confiança para mensagens do bot */}
-      <div className="message-confidence">
-        Confiança: 100%
-      </div>
-      {/* TODO: Mostrar fontes se existirem */}
-      <details className="message-sources">
-        <summary>📚 Ver fontes (0)</summary>
-        <div className="sources-list">
-          <div className="source-item">
-            <strong>Trecho:</strong>
-            <p>Teste</p>
-          </div>
+      {type === 'bot' && confidence !== undefined && (
+        <div className="message-confidence">
+          Confiança: {Math.round(confidence * 100)}%
         </div>
-      </details>
+      )}
+
+      {/* TODO: Mostrar fontes se existirem */}
+      {sources && sources.length > 0 && (
+        <details className="message-sources">
+          <summary>📚 Ver fontes ({sources.length})</summary>
+          <div className="sources-list">
+            {sources.map((source, index) => (
+              <div className="source-item" key={index}>
+                <strong>Trecho: {index + 1}</strong>
+                <p>{source}</p>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   );
 }
